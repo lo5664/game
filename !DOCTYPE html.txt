@@ -495,4 +495,4 @@ function toggleHint(){const h=document.getElementById('hint-box');h.style.displa
 init();
 </script>
 </body>
-</html>
+</html> 
