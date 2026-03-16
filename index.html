@@ -8,19 +8,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Space+Mono:wght@400;700&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root {
+:root{
   --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;
   --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.15);
   --text:#e8e6df;--text2:#8a8880;--text3:#4a4845;
   --accent:#c8a96e;--accent2:#8b6f42;--gold:#d4af5a;
   --green:#4a9e6b;--green-bg:rgba(74,158,107,0.12);
   --red:#c45c4a;--red-bg:rgba(196,92,74,0.12);
+  --blue:#4a7ec4;--blue-bg:rgba(74,126,196,0.12);
   --mono:'Space Mono',monospace;--serif:'Noto Serif SC',serif;--sans:'Noto Sans SC',sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:300;min-height:100vh;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(200,169,110,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(200,169,110,0.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
 body::after{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50%);width:700px;height:400px;background:radial-gradient(ellipse,rgba(200,169,110,0.05) 0%,transparent 70%);pointer-events:none;z-index:0}
+
 header{position:relative;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:1.25rem 2.5rem;border-bottom:1px solid var(--border);backdrop-filter:blur(8px);flex-wrap:wrap;gap:12px}
 .logo{font-family:var(--mono);font-size:16px;letter-spacing:.3em;color:var(--accent)}
 .logo span{color:var(--text3);margin:0 5px}
@@ -33,6 +35,8 @@ header{position:relative;z-index:10;display:flex;align-items:center;justify-cont
 .user-email{font-family:var(--mono);font-size:10px;color:var(--text3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .btn-sm{padding:6px 14px;background:transparent;border:1px solid var(--border);border-radius:3px;color:var(--text3);font-family:var(--mono);font-size:10px;letter-spacing:.1em;cursor:pointer;transition:all .2s}
 .btn-sm:hover{border-color:var(--border2);color:var(--text2)}
+.btn-sm.active{border-color:var(--accent2);color:var(--accent)}
+
 main{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:3rem 1.5rem 5rem}
 .screen{display:none;animation:fadeUp .45s ease both}
 .screen.active{display:block}
@@ -76,9 +80,13 @@ main{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:3rem 1.5r
 .ch-lock{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--text3)}
 .ch-item.done .ch-name{color:var(--green)}
 .ch-item.done .ch-lock{color:var(--green)}
+.ch-item.locked{opacity:.4}
+.btn-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .btn-start{display:inline-flex;align-items:center;gap:10px;padding:13px 28px;background:var(--accent);color:#0a0a0f;border:none;border-radius:4px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .1s}
 .btn-start:hover{background:var(--gold)}
 .btn-start:active{transform:scale(.98)}
+.btn-board{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;background:transparent;border:1px solid var(--border2);color:var(--text2);border-radius:4px;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.btn-board:hover{border-color:var(--accent2);color:var(--accent)}
 .resume-note{margin-top:1rem;font-family:var(--mono);font-size:11px;color:var(--green)}
 
 /* GAME */
@@ -127,8 +135,35 @@ main{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:3rem 1.5r
 .win-stats{display:flex;justify-content:center;gap:3rem;margin-bottom:2.5rem}
 .stat-num{display:block;font-family:var(--mono);font-size:28px;font-weight:700;color:var(--accent)}
 .stat-label{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--text3);text-transform:uppercase}
+.win-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .btn-restart{padding:11px 26px;background:transparent;border:1px solid var(--border2);border-radius:4px;color:var(--text2);font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .2s}
 .btn-restart:hover{border-color:var(--accent2);color:var(--accent)}
+
+/* LEADERBOARD */
+.board-header{margin-bottom:2rem}
+.board-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.3em;color:var(--accent2);margin-bottom:.75rem}
+.board-title{font-family:var(--serif);font-size:26px;font-weight:600;color:var(--text);margin-bottom:.5rem}
+.board-sub{font-size:13px;color:var(--text2);line-height:1.7}
+.board-table{width:100%;border-collapse:collapse;margin-bottom:2rem}
+.board-table th{font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--text3);text-transform:uppercase;padding:.6rem 1rem;text-align:left;border-bottom:1px solid var(--border)}
+.board-table th:last-child{text-align:right}
+.board-table td{padding:.85rem 1rem;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border)}
+.board-table td:last-child{text-align:right;font-family:var(--mono);font-size:12px}
+.board-table tr:hover td{background:var(--bg2)}
+.rank-num{font-family:var(--mono);font-size:12px;color:var(--text3);width:32px}
+.rank-1 .rank-num{color:var(--gold)}
+.rank-2 .rank-num{color:#a0a0a0}
+.rank-3 .rank-num{color:#8b6f42}
+.rank-1 td{color:var(--text)}
+.board-me td{color:var(--accent) !important;background:rgba(200,169,110,0.05) !important}
+.board-me .rank-num{color:var(--accent)}
+.board-empty{text-align:center;padding:3rem;font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:.1em}
+.board-loading{text-align:center;padding:2rem;font-family:var(--mono);font-size:11px;color:var(--text3)}
+.board-back{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;background:transparent;border:1px solid var(--border2);border-radius:4px;color:var(--text2);font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.board-back:hover{border-color:var(--accent2);color:var(--accent)}
+.my-rank-box{border:1px solid rgba(200,169,110,0.2);border-radius:6px;padding:1rem 1.25rem;background:rgba(200,169,110,0.05);margin-bottom:1.5rem;display:none}
+.my-rank-label{font-family:var(--mono);font-size:10px;letter-spacing:.15em;color:var(--accent2);margin-bottom:.4rem}
+.my-rank-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--accent)}
 
 /* TOAST */
 #toast{position:fixed;bottom:2rem;right:2rem;z-index:999;font-family:var(--mono);font-size:11px;letter-spacing:.1em;padding:10px 16px;border-radius:4px;border:1px solid var(--border2);background:var(--bg2);color:var(--text2);opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s;pointer-events:none}
@@ -155,9 +190,10 @@ footer{position:relative;z-index:1;text-align:center;padding:1.5rem;border-top:1
   <div class="logo">CIPHER<span>/</span>密室</div>
   <div class="header-right">
     <div class="progress-area" id="progress-area" style="display:none">
-      <span class="progress-label" id="prog-label">0/3</span>
+      <span class="progress-label" id="prog-label">0/6</span>
       <div class="progress-track"><div class="progress-fill" id="prog-fill"></div></div>
     </div>
+    <button class="btn-sm" id="btn-nav-board" onclick="showBoard()" style="display:none">排行榜</button>
     <div id="user-info" style="display:none">
       <span class="user-email" id="user-email-display"></span>
       <button class="btn-sm" onclick="signOut()">退出</button>
@@ -172,7 +208,7 @@ footer{position:relative;z-index:1;text-align:center;padding:1.5rem;border-top:1
     <div class="auth-wrap">
       <div class="auth-eyebrow">CIPHER · 玩家登录</div>
       <h1 class="auth-title">登录以保存<br>你的游戏进度</h1>
-      <p class="auth-sub">注册或登录后，游戏进度将自动保存至云端，换设备也能继续挑战。</p>
+      <p class="auth-sub">注册或登录后，游戏进度自动保存至云端，并可登上全球排行榜。</p>
       <div id="auth-login">
         <div class="form-field">
           <label class="form-label">邮箱</label>
@@ -188,6 +224,10 @@ footer{position:relative;z-index:1;text-align:center;padding:1.5rem;border-top:1
         <div class="auth-switch">还没有账号？<button onclick="switchToRegister()">立即注册</button></div>
       </div>
       <div id="auth-register" style="display:none">
+        <div class="form-field">
+          <label class="form-label">昵称（显示在排行榜）</label>
+          <input class="form-input" type="text" id="reg-nickname" placeholder="探险者" maxlength="12" />
+        </div>
         <div class="form-field">
           <label class="form-label">邮箱</label>
           <input class="form-input" type="email" id="reg-email" placeholder="your@email.com" />
@@ -207,18 +247,20 @@ footer{position:relative;z-index:1;text-align:center;padding:1.5rem;border-top:1
   <!-- INTRO -->
   <div class="screen" id="screen-intro">
     <div class="intro-eyebrow">解谜游戏 · Vol.1</div>
-    <h1 class="intro-title">三重<em>密码</em><br>等你破解</h1>
-    <p class="intro-desc">你被困在一座神秘建筑中。废弃的图书馆、古老的石门、深锁的密室——每一道锁背后都藏着线索，每一条线索都指向真相。</p>
+    <h1 class="intro-title">六重<em>密码</em><br>等你破解</h1>
+    <p class="intro-desc">你被困在一座神秘建筑中。从废弃图书馆到古老天文台，每一道锁背后都藏着谜题，每一条线索都指向真相。</p>
     <div class="divider"></div>
-    <div class="chapters-preview">
-      <div class="ch-item" id="ch-preview-0"><span class="ch-num">01</span><span class="ch-name">废弃图书馆</span><span class="ch-lock">4位数字</span></div>
-      <div class="ch-item" id="ch-preview-1"><span class="ch-num">02</span><span class="ch-name">神秘走廊</span><span class="ch-lock">4位字母</span></div>
-      <div class="ch-item" id="ch-preview-2"><span class="ch-num">03</span><span class="ch-name">古老密室</span><span class="ch-lock">1位数字</span></div>
+    <div class="chapters-preview" id="chapters-preview"></div>
+    <div class="btn-row">
+      <button class="btn-start" id="btn-start" onclick="startGame()">
+        开始挑战
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6h8M6 2l4 4-4 4"/></svg>
+      </button>
+      <button class="btn-board" onclick="showBoard()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="6" width="2" height="5"/><rect x="5" y="3" width="2" height="8"/><rect x="9" y="1" width="2" height="10"/></svg>
+        排行榜
+      </button>
     </div>
-    <button class="btn-start" id="btn-start" onclick="startGame()">
-      开始挑战
-      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6h8M6 2l4 4-4 4"/></svg>
-    </button>
     <div class="resume-note" id="resume-note" style="display:none">↑ 检测到存档，将从上次进度继续</div>
   </div>
 
@@ -265,14 +307,35 @@ footer{position:relative;z-index:1;text-align:center;padding:1.5rem;border-top:1
     <div class="win-wrap">
       <div class="win-ornament">— 恭喜通关 —</div>
       <h2 class="win-title">密室已被<em>破解</em></h2>
-      <p class="win-desc">你凭借缜密的推理，逐一破解了三重密码，成功逃出了这座神秘建筑。</p>
+      <p class="win-desc">你凭借缜密的推理，逐一破解了六重密码，成功逃出了这座神秘建筑。</p>
       <div class="win-stats">
-        <div><span class="stat-num">3</span><span class="stat-label">关卡</span></div>
+        <div><span class="stat-num">6</span><span class="stat-label">关卡</span></div>
         <div><span class="stat-num" id="stat-clues">0</span><span class="stat-label">线索</span></div>
         <div><span class="stat-num" id="stat-time">0</span><span class="stat-label">分钟</span></div>
       </div>
-      <button class="btn-restart" onclick="restart()">再挑战一次</button>
+      <div class="win-btns">
+        <button class="btn-restart" onclick="restart()">再挑战一次</button>
+        <button class="btn-restart" onclick="showBoard()" style="border-color:var(--accent2);color:var(--accent)">查看排行榜</button>
+      </div>
     </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div class="screen" id="screen-board">
+    <div class="board-header">
+      <div class="board-eyebrow">CIPHER · 全球排行</div>
+      <h2 class="board-title">排行榜</h2>
+      <p class="board-sub">完成全部六关的玩家，按用时从短到长排列。</p>
+    </div>
+    <div class="my-rank-box" id="my-rank-box">
+      <div class="my-rank-label">你的排名</div>
+      <div class="my-rank-val" id="my-rank-val">—</div>
+    </div>
+    <div id="board-content"><div class="board-loading">加载中…</div></div>
+    <button class="board-back" onclick="show('screen-intro')">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 1L3 5l4 4"/></svg>
+      返回
+    </button>
   </div>
 
 </main>
@@ -282,10 +345,9 @@ footer{position:relative;z-index:1;text-align:center;padding:1.5rem;border-top:1
 <script>
 // ══════════════════════════════════════════
 //  ⚙️  替换为你的 Supabase 项目信息
-//  在 Supabase 控制台 → Settings → API 获取
 // ══════════════════════════════════════════
-const SUPABASE_URL = 'https://oyuqqbuideppesvydkdp.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im95dXFxYnVpZGVwcGVzdnlka2RwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM2NDk2OTUsImV4cCI6MjA4OTIyNTY5NX0.Jgdb0UhBkEtO7O9j82I5hEMua24kmL4iOaclRoAhuBo';
+const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY_HERE';
 // ══════════════════════════════════════════
 
 const { createClient } = supabase;
@@ -314,7 +376,7 @@ const chapters = [
       {label:"蜡烛旁的纸",text:"写着：「WALL → ALL → ALE，找到第一个词。」"}
     ],
     answer:"WALL",hint:"WALL（墙）→ ALL（全部）→ ALE（麦酒）。你正在看一面墙。",
-    success:"石门缓缓升起，发出沉重的轰鸣声。里面是一个充满古老气息的密室，中央摆着一个上了锁的宝箱。"
+    success:"石门缓缓升起。里面是一个充满古老气息的密室，中央摆着一个上了锁的宝箱。"
   },
   {
     title:"古老密室",
@@ -326,29 +388,85 @@ const chapters = [
       {label:"骷髅手中的纸",text:"写着：「别被夜晚迷惑——它第8天的白天就爬出去了。答案是8。」"}
     ],
     answer:"8",hint:"第7天结束蜗牛在7米处，第8天白天爬3米到达10米，成功！答案是8天。",
-    success:"宝箱大开，金光四射。里面是一把金钥匙和一张纸条：「聪明的探险者，密室已无秘密可言。」"
+    success:"宝箱打开，里面是一把钥匙和一张地图，指向建筑深处的钟楼……"
+  },
+  {
+    title:"午夜钟楼",
+    desc:"钟楼的大门上嵌着一个圆形转盘，上面写着：「我从不移动，却让万物流逝。我有指针，却无法握住。猜出我是什么，拼出英文。」",
+    clues:[
+      {label:"塔顶的钟面",text:"一面巨大的时钟静止在午夜12点，指针交叠成一条直线。"},
+      {label:"墙上的诗句",text:"「Time waits for no one. 五个字母，从T开始。」"},
+      {label:"地板的铭文",text:"「答案是那个控制一切、却永远无法被触碰的东西。」"},
+      {label:"碎玻璃旁的便条",text:"「T-I-M-E，四个字母，就是答案。」"}
+    ],
+    answer:"TIME",hint:"谜面说的是「时间」，英文 TIME，四个字母。",
+    success:"转盘咔哒一声，钟楼的暗门打开，你顺着石阶向下，来到了一个充满化学气味的实验室……"
+  },
+  {
+    title:"禁忌实验室",
+    desc:"实验室的保险柜需要一个三位数密码。台面上散落着实验记录：「取氢的原子序数，乘以碳的原子序数，再加上氧的原子序数，即为密码。」",
+    clues:[
+      {label:"元素周期表残页",text:"氢（H）= 1号元素，碳（C）= 6号元素，氧（O）= 8号元素。"},
+      {label:"实验记录本",text:"公式写得很清楚：「密码 = H的序数 × C的序数 + O的序数」"},
+      {label:"白板上的草算",text:"有人写了一半：「1 × 6 = 6，然后加上……」"},
+      {label:"试管架标签",text:"「最终答案是一个十四。」"}
+    ],
+    answer:"14",hint:"1（氢）× 6（碳）+ 8（氧）= 6 + 8 = 14，两位数密码。",
+    success:"保险柜弹开，里面有一张通往顶层天文台的通行证和最后一道谜题……"
+  },
+  {
+    title:"星空天文台",
+    desc:"天文台的最终大门刻着最后一道谜题：「我是所有数字的起点，也是任何数字乘以我的终点。我让加法无用，让减法原地踏步。我是什么？」",
+    clues:[
+      {label:"星图中央",text:"星图的正中心，有一个空白的圆圈，什么也没有标注。"},
+      {label:"望远镜目镜旁",text:"贴着一张纸：「宇宙诞生之前，是什么？」"},
+      {label:"天文学家的日记",text:"「任何数 × 0 = 0，任何数 + 0 = 原数，0 是一切的起点。」"},
+      {label:"密码盘说明",text:"「输入这个特殊数字，门将为你打开。」"}
+    ],
+    answer:"0",hint:"谜面描述的是数字「0」——所有数字的起点，任何数乘以它都等于0。",
+    success:"大门缓缓打开，星空映入眼帘。你自由了。"
   }
 ];
 
-let currentUser=null,current=0,foundClues=[[],[],[]],totalCluesFound=0,startTime=null;
+let currentUser=null,userNickname='',current=0,foundClues=[],totalCluesFound=0,startTime=null;
+const TOTAL=chapters.length;
 
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+// init foundClues array
+function initFoundClues(){foundClues=Array.from({length:TOTAL},()=>[])}
+initFoundClues();
+
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
 function toast(msg,d=2500){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),d)}
 function hideLoading(){const el=document.getElementById('loading-overlay');el.style.opacity='0';setTimeout(()=>el.style.display='none',400)}
-function updateProgress(n){document.getElementById('prog-fill').style.width=(n/chapters.length*100)+'%';document.getElementById('prog-label').textContent=`${n}/${chapters.length}`}
+function updateProgress(n){document.getElementById('prog-fill').style.width=(n/TOTAL*100)+'%';document.getElementById('prog-label').textContent=`${n}/${TOTAL}`}
+
+function buildIntroList(){
+  const locks=['4位数字','4位字母','1位数字','4位字母','2位数字','1位数字'];
+  const wrap=document.getElementById('chapters-preview');
+  wrap.innerHTML=chapters.map((ch,i)=>`
+    <div class="ch-item${i<current?' done':i>current?' locked':''}" id="ch-preview-${i}">
+      <span class="ch-num">${String(i+1).padStart(2,'0')}</span>
+      <span class="ch-name">${ch.title}</span>
+      <span class="ch-lock">${i<current?'✓ 已通关':locks[i]}</span>
+    </div>`).join('');
+}
 
 async function init(){
   const {data:{session}}=await sb.auth.getSession();
-  if(session){currentUser=session.user;onLoggedIn();}
+  if(session){currentUser=session.user;await onLoggedIn();}
   else{show('screen-auth');}
   hideLoading();
 }
 
-function onLoggedIn(){
+async function onLoggedIn(){
   document.getElementById('user-email-display').textContent=currentUser.email;
   document.getElementById('user-info').style.display='flex';
   document.getElementById('progress-area').style.display='flex';
-  loadProgress();
+  document.getElementById('btn-nav-board').style.display='block';
+  await loadProgress();
 }
 
 async function doLogin(){
@@ -360,27 +478,29 @@ async function doLogin(){
   const {data,error}=await sb.auth.signInWithPassword({email,password:pw});
   btn.disabled=false;btn.textContent='登录';
   if(error){showAuthMsg('login-msg','登录失败：'+error.message,'err');return}
-  currentUser=data.user;onLoggedIn();show('screen-intro');
+  currentUser=data.user;await onLoggedIn();show('screen-intro');
 }
 
 async function doRegister(){
+  const nickname=document.getElementById('reg-nickname').value.trim()||'探险者';
   const email=document.getElementById('reg-email').value.trim();
   const pw=document.getElementById('reg-password').value;
   const btn=document.getElementById('reg-btn');
   if(!email||!pw){showAuthMsg('reg-msg','请填写邮箱和密码','err');return}
   if(pw.length<6){showAuthMsg('reg-msg','密码至少需要6位','err');return}
   btn.disabled=true;btn.textContent='注册中…';
-  const {data,error}=await sb.auth.signUp({email,password:pw});
+  const {data,error}=await sb.auth.signUp({email,password:pw,options:{data:{nickname}}});
   btn.disabled=false;btn.textContent='注册并开始游戏';
   if(error){showAuthMsg('reg-msg','注册失败：'+error.message,'err');return}
   if(data.user&&!data.session){showAuthMsg('reg-msg','注册成功！请查收确认邮件后登录。','ok');return}
-  currentUser=data.user;onLoggedIn();show('screen-intro');
+  currentUser=data.user;userNickname=nickname;await onLoggedIn();show('screen-intro');
 }
 
 async function signOut(){
-  await sb.auth.signOut();currentUser=null;current=0;foundClues=[[],[],[]];totalCluesFound=0;
+  await sb.auth.signOut();currentUser=null;current=0;initFoundClues();totalCluesFound=0;
   document.getElementById('user-info').style.display='none';
   document.getElementById('progress-area').style.display='none';
+  document.getElementById('btn-nav-board').style.display='none';
   show('screen-auth');toast('已退出登录');
 }
 
@@ -391,37 +511,40 @@ function switchToLogin(){document.getElementById('auth-register').style.display=
 async function loadProgress(){
   if(!currentUser)return;
   const {data}=await sb.from('game_progress').select('*').eq('user_id',currentUser.id).maybeSingle();
+  userNickname=currentUser.user_metadata?.nickname||currentUser.email.split('@')[0];
   if(data&&!data.completed){
     current=data.current_chapter||0;
-    foundClues=data.found_clues||[[],[],[]];
+    foundClues=data.found_clues||Array.from({length:TOTAL},()=>[]);
+    if(foundClues.length<TOTAL)foundClues=[...foundClues,...Array.from({length:TOTAL-foundClues.length},()=>[])];
     totalCluesFound=data.total_clues_found||0;
-    startTime=data.start_time?new Date(data.start_time).getTime():Date.now();
+    startTime=data.start_time?new Date(data.start_time).getTime():null;
     updateProgress(current);
-    for(let i=0;i<current;i++){
-      const el=document.getElementById('ch-preview-'+i);
-      if(el){el.classList.add('done');el.querySelector('.ch-lock').textContent='✓ 已通关'}
-    }
     if(current>0){document.getElementById('resume-note').style.display='block';document.getElementById('btn-start').textContent='继续挑战 →'}
   }
+  buildIntroList();
   show('screen-intro');
 }
 
-async function saveProgress(completed=false){
+async function saveProgress(completed=false,finishMins=null){
   if(!currentUser)return;
-  const {error}=await sb.from('game_progress').upsert({
+  const payload={
     user_id:currentUser.id,current_chapter:current,found_clues:foundClues,
     total_clues_found:totalCluesFound,
     start_time:startTime?new Date(startTime).toISOString():new Date().toISOString(),
-    completed,updated_at:new Date().toISOString()
-  },{onConflict:'user_id'});
-  if(!error){const n=document.getElementById('saving-note');if(n){n.textContent='✓ 已保存';setTimeout(()=>{n.textContent=''},2000)}}
+    completed,updated_at:new Date().toISOString(),
+    nickname:userNickname
+  };
+  if(completed&&finishMins!==null)payload.finish_minutes=finishMins;
+  await sb.from('game_progress').upsert(payload,{onConflict:'user_id'});
+  const n=document.getElementById('saving-note');
+  if(n){n.textContent='✓ 已保存';setTimeout(()=>{n.textContent=''},2000)}
 }
 
 function startGame(){if(!startTime)startTime=Date.now();renderChapter();show('screen-game')}
 
 function renderChapter(){
   const ch=chapters[current];
-  document.getElementById('ch-tag').textContent=`关卡 ${String(current+1).padStart(2,'0')} / ${String(chapters.length).padStart(2,'0')}`;
+  document.getElementById('ch-tag').textContent=`关卡 ${String(current+1).padStart(2,'0')} / ${String(TOTAL).padStart(2,'0')}`;
   document.getElementById('ch-title').textContent=ch.title;
   document.getElementById('ch-desc').textContent=ch.desc;
   document.getElementById('clue-detail').textContent='点击上方按钮，检查现场……';
@@ -458,10 +581,10 @@ function tryUnlock(){
   const fb=document.getElementById('feedback');
   if(val===ch.answer.toUpperCase()){
     fb.className='feedback ok';fb.textContent='√ 正确';
-    current++;updateProgress(current);
+    current++;updateProgress(current);buildIntroList();
     setTimeout(async()=>{
-      if(current<chapters.length){document.getElementById('success-msg').textContent=ch.success;await saveProgress(false);show('screen-success')}
-      else{await saveProgress(true);showWin()}
+      if(current<TOTAL){document.getElementById('success-msg').textContent=ch.success;await saveProgress(false);show('screen-success')}
+      else{const mins=Math.max(1,Math.round((Date.now()-startTime)/60000));await saveProgress(true,mins);showWin(mins)}
     },700);
   }else{
     fb.className='feedback err';fb.textContent='× 密码有误';
@@ -471,28 +594,66 @@ function tryUnlock(){
 
 function nextChapter(){renderChapter();show('screen-game')}
 
-function showWin(){
-  const mins=startTime?Math.max(1,Math.round((Date.now()-startTime)/60000)):1;
+function showWin(mins){
   document.getElementById('stat-clues').textContent=totalCluesFound;
-  document.getElementById('stat-time').textContent=mins;
-  show('screen-win');toast('通关！进度已保存',3000);
+  document.getElementById('stat-time').textContent=mins||Math.max(1,Math.round((Date.now()-startTime)/60000));
+  show('screen-win');toast('🏆 通关！成绩已上传排行榜',3500);
 }
 
 async function restart(){
-  current=0;foundClues=[[],[],[]];totalCluesFound=0;startTime=Date.now();
+  current=0;initFoundClues();totalCluesFound=0;startTime=Date.now();
   await saveProgress(false);
-  for(let i=0;i<chapters.length;i++){
-    const el=document.getElementById('ch-preview-'+i);
-    if(el){el.classList.remove('done');el.querySelector('.ch-lock').textContent=['4位数字','4位字母','1位数字'][i]}
-  }
   document.getElementById('resume-note').style.display='none';
   document.getElementById('btn-start').textContent='开始挑战 →';
-  updateProgress(0);show('screen-intro');
+  updateProgress(0);buildIntroList();show('screen-intro');
 }
 
 function toggleHint(){const h=document.getElementById('hint-box');h.style.display=h.style.display==='block'?'none':'block'}
 
+// ── LEADERBOARD ──
+async function showBoard(){
+  show('screen-board');
+  document.getElementById('board-content').innerHTML='<div class="board-loading">加载中…</div>';
+  document.getElementById('my-rank-box').style.display='none';
+
+  const {data,error}=await sb
+    .from('game_progress')
+    .select('user_id,nickname,finish_minutes,total_clues_found')
+    .eq('completed',true)
+    .order('finish_minutes',{ascending:true})
+    .limit(50);
+
+  if(error||!data||data.length===0){
+    document.getElementById('board-content').innerHTML='<div class="board-empty">暂无通关记录，成为第一名吧！</div>';
+    return;
+  }
+
+  // find my rank
+  const myIdx=data.findIndex(r=>r.user_id===currentUser?.id);
+  if(myIdx>=0){
+    document.getElementById('my-rank-box').style.display='block';
+    document.getElementById('my-rank-val').textContent=`第 ${myIdx+1} 名 · ${data[myIdx].finish_minutes} 分钟`;
+  }
+
+  const rows=data.map((r,i)=>{
+    const isMe=r.user_id===currentUser?.id;
+    const medal=i===0?'01':i===1?'02':i===2?'03':String(i+1).padStart(2,'0');
+    const name=r.nickname||'匿名探险者';
+    return `<tr class="rank-${i+1<=3?i+1:'x'}${isMe?' board-me':''}">
+      <td class="rank-num">${medal}</td>
+      <td>${name}${isMe?' <span style="font-family:var(--mono);font-size:10px;color:var(--accent2)">(你)</span>':''}</td>
+      <td>${r.finish_minutes ?? '—'} 分钟</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('board-content').innerHTML=`
+    <table class="board-table">
+      <thead><tr><th>排名</th><th>玩家</th><th style="text-align:right">通关用时</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
 init();
 </script>
 </body>
-</html> 
+</html>
